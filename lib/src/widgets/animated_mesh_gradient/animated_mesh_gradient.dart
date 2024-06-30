@@ -87,7 +87,7 @@ class AnimatedMeshGradient extends StatelessWidget {
           return AnimatedBuilder(
             animation: controller!,
             builder: (_, child) {
-              time.value = time.value.floor() + (controller?.value ?? 0);
+              time.value += 0.001;
               return _buildPaint(
                 shader,
                 time.value,
