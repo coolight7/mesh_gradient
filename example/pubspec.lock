@@ -145,7 +145,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.3.7"
+    version: "1.3.8"
   meta:
     dependency: transitive
     description:
@@ -155,7 +155,7 @@ packages:
     source: hosted
     version: "1.15.0"
   my_util_base:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: my_util_base
       sha256: b07d3a400b9ba06803b94854744ba516bdbe8a452e3d91d50903d1bad2d9aaee

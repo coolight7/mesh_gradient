@@ -55,20 +55,6 @@ class _MeshGradientState extends State<MeshGradient> {
       'packages/mesh_gradient/shaders/point_mesh_gradient.frag';
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // Dispose of the controller if it exists to clean up resources.
-    if (widget.controller != null) {
-      widget.controller!.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     // Use ShaderBuilder to create a widget that will paint the gradient.
     return ShaderBuilder(
