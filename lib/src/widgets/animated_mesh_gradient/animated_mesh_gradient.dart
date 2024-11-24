@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:mesh_gradient/src/widgets/animated_mesh_gradient/animated_mesh_gradient_options.dart';
 import 'package:mesh_gradient/src/widgets/animated_mesh_gradient/animated_mesh_gradient_painter.dart';
-import 'package:my_util_base/MyUtil.dart';
+import 'package:util_xx/util_xx.dart';
 
 /// A widget that paints an animated mesh gradient.
 ///
@@ -43,7 +43,7 @@ class AnimatedMeshGradient extends StatelessWidget {
     });
   }
 
-  final MyObj_c<double> time;
+  final Objxx_c<double> time;
 
   /// Define 4 colors which will be used to create an animated gradient.
   final List<Color> colors;
