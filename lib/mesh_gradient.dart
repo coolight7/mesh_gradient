@@ -1,4 +1,4 @@
-library mesh_gradient;
+library;
 
 /// Animated Mesh Gradient
 export 'package:mesh_gradient/src/widgets/animated_mesh_gradient/animated_mesh_gradient.dart';
