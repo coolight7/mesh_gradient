@@ -71,11 +71,14 @@ class MeshGradientController {
       );
 
       void listener() {
+        final animate = CurveTween(curve: curve).animate(
+          animationController,
+        );
         final Offset animatedPosition = positionTween.evaluate(
-          CurvedAnimation(parent: animationController, curve: curve),
+          animate,
         );
         final Color? animatedColor = colorTween.evaluate(
-          CurvedAnimation(parent: animationController, curve: curve),
+          animate,
         );
 
         MeshGradientPoint animatedPoint = MeshGradientPoint(
@@ -156,9 +159,9 @@ class MeshGradientController {
           end: newPoint.color,
         );
 
-        final Animation<double> sequenceAnimation = CurvedAnimation(
-          parent: animationController,
-          curve: sequence.interval,
+        final Animation<double> sequenceAnimation =
+            CurveTween(curve: sequence.interval).animate(
+          animationController,
         );
 
         void sequenceListener() {
