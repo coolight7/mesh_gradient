@@ -68,7 +68,7 @@ class AnimatedMeshGradient extends StatelessWidget {
     return CustomPaint(
       painter: AnimatedMeshGradientPainter(
         shader: shader,
-        time: time * 10,
+        time: time,
         colors: colors,
         options: options,
       ),
@@ -79,7 +79,13 @@ class AnimatedMeshGradient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Builds the widget using a ShaderBuilder to apply the animated mesh gradient effect.
+    double sig = 0;
+    double add(double curr) {
+      final sub = (curr - sig).abs().clamp(0.01, 0.02);
+      sig = curr;
+      return sub;
+    }
+
     return ShaderBuilder(
       assetKey: _shaderAssetPath,
       (context, shader, child) {
@@ -87,7 +93,7 @@ class AnimatedMeshGradient extends StatelessWidget {
           return AnimatedBuilder(
             animation: controller!,
             builder: (_, child) {
-              time.value += 0.001;
+              time.value += add(controller!.value);
               return _buildPaint(
                 shader,
                 time.value,
