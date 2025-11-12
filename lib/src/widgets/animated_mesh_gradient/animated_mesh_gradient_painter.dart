@@ -23,7 +23,7 @@ class AnimatedMeshGradientPainter extends CustomPainter {
   final double time;
 
   /// The colors used in the mesh gradient.
-  final List<Color> colors;
+  final List<HSLColor> colors;
 
   /// The options to customize the animation of the mesh gradient.
   final AnimatedMeshGradientOptions options;
@@ -45,12 +45,12 @@ class AnimatedMeshGradientPainter extends CustomPainter {
 
     // Converts and sets the gradient colors to the shader.
     int i = 7;
-    for (Color color in colors) {
-      shader.setFloat(i, color.red / 255);
+    for (final c in colors) {
+      shader.setFloat(i, c.hue);
       i++;
-      shader.setFloat(i, color.green / 255);
+      shader.setFloat(i, c.saturation);
       i++;
-      shader.setFloat(i, color.blue / 255);
+      shader.setFloat(i, c.lightness);
       i++;
     }
 

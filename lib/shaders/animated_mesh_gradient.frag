@@ -8,10 +8,10 @@ uniform float uFrequency;
 uniform float uAmplitude;
 uniform float uSpeed;
 uniform float uGrain;
-uniform vec3 uColor1;
-uniform vec3 uColor2;
-uniform vec3 uColor3;
-uniform vec3 uColor4;
+uniform vec3 uColor1; // HSL color: h, s, l
+uniform vec3 uColor2; // HSL color: h, s, l
+uniform vec3 uColor3; // HSL color: h, s, l
+uniform vec3 uColor4; // HSL color: h, s, l
 
 out vec4 fragColor;
 
@@ -19,6 +19,78 @@ const float angle = radians(-5.0);
 const float sin5 = sin(angle);
 const float cos5 = cos(angle);
 const mat2 rotMinus5 = mat2(cos5, -sin5, sin5, cos5);
+
+// HSL 转 RGB
+vec3 hsl2rgb(vec3 hsl) {
+    float h = hsl.x / 60.0;
+    float s = hsl.y;
+    float l = hsl.z;
+    
+    float c = (1.0 - abs(2.0 * l - 1.0)) * s;
+    float x = c * (1.0 - abs(mod(h, 2.0) - 1.0));
+    float m = l - c * 0.5;
+    
+    vec3 rgb;
+    if (h < 1.0) {
+        rgb = vec3(c, x, 0.0);
+    } else if (h < 2.0) {
+        rgb = vec3(x, c, 0.0);
+    } else if (h < 3.0) {
+        rgb = vec3(0.0, c, x);
+    } else if (h < 4.0) {
+        rgb = vec3(0.0, x, c);
+    } else if (h < 5.0) {
+        rgb = vec3(x, 0.0, c);
+    } else {
+        rgb = vec3(c, 0.0, x);
+    }
+    
+    return clamp(rgb + m, 0.0, 1.0);
+}
+
+// HSL 颜色混合函数
+vec3 mixHSL(vec3 hsl1, vec3 hsl2, float t) {
+    float h1 = hsl1.x;
+    float h2 = hsl2.x;
+    
+    float dh = h2 - h1;
+    if (abs(dh) > 180.0) {
+        if (dh > 0.0) {
+            h1 += 360.0;
+        } else {
+            h2 += 360.0;
+        }
+    }
+    
+    float h = mix(h1, h2, t);
+    h = mod(h, 360.0);
+    
+    float smoothT = t * t * (3.0 - 2.0 * t); // 平滑缓动
+    
+    float s = mix(hsl1.y, hsl2.y, smoothT);
+    float l = mix(hsl1.z, hsl2.z, smoothT);
+    
+    return vec3(h, s, l);
+}
+
+// 在 RGB 空间进行最终混合，避免 HSL 转换的亮线
+vec3 mixRGBThroughHSL(vec3 hsl1, vec3 hsl2, float t) {
+    if (t <= 0.0) return hsl2rgb(hsl1);
+    if (t >= 1.0) return hsl2rgb(hsl2);
+    
+    // 使用 RGB 混合来避免亮线
+    vec3 rgb1 = hsl2rgb(hsl1);
+    vec3 rgb2 = hsl2rgb(hsl2);
+    
+    // 当亮度差异较大时，偏向使用 RGB 混合
+    float lDiff = abs(hsl1.z - hsl2.z);
+    if (lDiff > 0.3) {
+        float rgbBlend = smoothstep(0.3, 0.5, lDiff);
+        return mix(hsl2rgb(mixHSL(hsl1, hsl2, t)), mix(rgb1, rgb2, t), rgbBlend);
+    }
+    
+    return hsl2rgb(mixHSL(hsl1, hsl2, t));
+}
 
 vec2 hash(vec2 p) {
     p = vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)));
@@ -59,10 +131,18 @@ void main() {
 
     vec2 rtuv = tuv * rotMinus5;
 
-    float sx = S(-0.8,0.7,rtuv.x);
-    vec3 col = mix(mix(uColor1,uColor2,sx), mix(uColor3,uColor4,sx), S(0.6,-0.5,tuv.y));
-
-    col += col * grain(uv) * uGrain;
+    float sx = S(-1, 1, rtuv.x);
     
-    fragColor = vec4(col,1.0);
+    vec3 col12 = mixRGBThroughHSL(uColor1, uColor2, sx);
+    vec3 col34 = mixRGBThroughHSL(uColor3, uColor4, sx);
+    
+    float yBlend = S(0.6, -0.5, tuv.y);
+    float smoothYBlend = yBlend * yBlend * (3.0 - 2.0 * yBlend);
+    
+    vec3 col = mix(col12, col34, smoothYBlend);
+    
+    float g = grain(uv * uSize + uTime) * uGrain;
+    col += (g - 0.5) * 0.02;
+    
+    fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
 }
