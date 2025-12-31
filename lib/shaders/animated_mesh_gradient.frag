@@ -15,11 +15,6 @@ uniform vec3 uColor4; // HSL color: h, s, l
 
 out vec4 fragColor;
 
-const float angle = radians(-5.0);
-const float sin5 = sin(angle);
-const float cos5 = cos(angle);
-const mat2 rotMinus5 = mat2(cos5, -sin5, sin5, cos5);
-
 vec3 hsl2rgb(vec3 hsl) {
   float h = hsl.x / 60.0;
   float s = hsl.y;
@@ -51,20 +46,10 @@ vec3 mixHSL(vec3 hsl1, vec3 hsl2, float t) {
   float h1 = hsl1.x;
   float h2 = hsl2.x;
 
-  float dh = h2 - h1;
-  if (abs(dh) > 180.0) {
-    if (dh > 0.0) {
-      h1 += 360.0;
-    } else {
-      h2 += 360.0;
-    }
-  }
-
-  float h = mix(h1, h2, t);
-  h = mod(h, 360.0);
+  float dh = mod(h2 - h1 + 180.0, 360.0) - 180.0;
+  float h = mod(h1 + dh * t, 360.0);
 
   float smoothT = t * t * (3.0 - 2.0 * t);
-
   float s = mix(hsl1.y, hsl2.y, smoothT);
   float l = mix(hsl1.z, hsl2.z, smoothT);
 
@@ -77,16 +62,12 @@ vec3 mixRGBThroughHSL(vec3 hsl1, vec3 hsl2, float t) {
   if (t >= 1.0)
     return hsl2rgb(hsl2);
 
-  vec3 rgb1 = hsl2rgb(hsl1);
-  vec3 rgb2 = hsl2rgb(hsl2);
-
   float lDiff = abs(hsl1.z - hsl2.z);
-  if (lDiff > 0.3) {
-    float rgbBlend = smoothstep(0.3, 0.5, lDiff);
-    return mix(hsl2rgb(mixHSL(hsl1, hsl2, t)), mix(rgb1, rgb2, t), rgbBlend);
-  }
+  float rgbBlend = smoothstep(0.3, 0.5, lDiff);
+  vec3 hslMix = hsl2rgb(mixHSL(hsl1, hsl2, t));
+  vec3 rgbMix = mix(hsl2rgb(hsl1), hsl2rgb(hsl2), t);
 
-  return hsl2rgb(mixHSL(hsl1, hsl2, t));
+  return mix(hslMix, rgbMix, rgbBlend);
 }
 
 vec2 hash(vec2 p) {
@@ -105,8 +86,7 @@ float noise(in vec2 p) {
   vec2 h01 = hash(i + vec2(0.0, 1.0)) * 2.0 - 1.0;
   vec2 h11 = hash(i + vec2(1.0, 1.0)) * 2.0 - 1.0;
 
-  return 0.5 + 0.5 * (mix(mix(dot(h00, f - vec2(0.0)),
-                              dot(h10, f - vec2(1.0, 0.0)), u.x),
+  return 0.5 + 0.5 * (mix(mix(dot(h00, f), dot(h10, f - vec2(1.0, 0.0)), u.x),
                           mix(dot(h01, f - vec2(0.0, 1.0)),
                               dot(h11, f - vec2(1.0, 1.0)), u.x),
                           u.y));
@@ -119,29 +99,23 @@ float grain(vec2 p) {
 void main() {
   vec2 uv = FlutterFragCoord().xy / uSize;
   float ratio = uSize.x / uSize.y;
+  vec2 tuv = uv - 0.5;
+  tuv.x *= ratio;
+
   float uTime_01 = uTime * 0.1;
   float uTime_speed = uTime * uSpeed;
-  vec2 freq_vec = vec2(uFrequency, uFrequency * 2.0);
 
-  vec2 tuv = uv - 0.5;
-  float angle =
-      radians((noise(vec2(uTime_01, tuv.x * tuv.y * 0.1)) - 0.7) * 360.0);
-  float s = sin(angle), c = cos(angle);
-  tuv *= mat2(c, -s / ratio, s * ratio, c);
+  vec2 freq_vec = vec2(uFrequency, uFrequency * 2.0);
 
   vec2 waves = sin(tuv.yx * freq_vec + uTime_speed);
   tuv += waves / vec2(uAmplitude, uAmplitude * 2.0);
-
-  vec2 rtuv = tuv * rotMinus5;
-
-  float sx = S(-1, 1, rtuv.x);
+  float sx = S(-0.8, 0.8, tuv.x);
 
   vec3 col12 = mixRGBThroughHSL(uColor1, uColor2, sx);
   vec3 col34 = mixRGBThroughHSL(uColor3, uColor4, sx);
 
-  float yBlend = S(0.6, -0.5, tuv.y);
+  float yBlend = S(0.5, -0.4, tuv.y);
   float smoothYBlend = yBlend * yBlend * (3.0 - 2.0 * yBlend);
-
   vec3 col = mix(col12, col34, smoothYBlend);
 
   float g = grain(uv * uSize + uTime) * uGrain;
