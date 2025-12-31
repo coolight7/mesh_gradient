@@ -7,7 +7,6 @@ uniform float uTime;
 uniform float uFrequency;
 uniform float uAmplitude;
 uniform float uSpeed;
-uniform float uGrain;
 uniform vec3 uColor1; // HSL color: h, s, l
 uniform vec3 uColor2; // HSL color: h, s, l
 uniform vec3 uColor3; // HSL color: h, s, l
@@ -116,10 +115,7 @@ void main() {
 
   float yBlend = S(0.5, -0.4, tuv.y);
   float smoothYBlend = yBlend * yBlend * (3.0 - 2.0 * yBlend);
-  vec3 col = mix(col12, col34, smoothYBlend);
-
-  float g = grain(uv * uSize + uTime) * uGrain;
-  col += (g - 0.5) * 0.02;
+  vec3 col = mix(col12, col34, smoothYBlend) + 0.01;
 
   fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
 }
