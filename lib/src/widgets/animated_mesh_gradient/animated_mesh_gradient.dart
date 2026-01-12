@@ -24,7 +24,7 @@ class AnimatedMeshGradient extends StatelessWidget {
   /// of the gradient.
   AnimatedMeshGradient({
     super.key,
-    required List<Color> colors,
+    required this.colors,
     required this.options,
     required this.time,
     this.controller,
@@ -32,7 +32,6 @@ class AnimatedMeshGradient extends StatelessWidget {
     this.seed,
   }) {
     assert(colors.length == 4);
-    this.colors = colors.map((c) => HSLColor.fromColor(c)).toList();
     // Attempts to precache the shader used for the gradient animation.
     Future(() async {
       try {
@@ -47,7 +46,7 @@ class AnimatedMeshGradient extends StatelessWidget {
   final Objxx_c<double> time;
 
   /// Define 4 colors which will be used to create an animated gradient.
-  late final List<HSLColor> colors;
+  late final List<Color> colors;
 
   /// Here you can define options to play with the animation / effect.
   final AnimatedMeshGradientOptions options;
