@@ -11,7 +11,7 @@ class AnimatedMeshGradientOptions {
   /// - [frequency]: Determines how often the gradient oscillates. Default value is 5.
   /// - [amplitude]: Controls the height of the gradient's oscillations. Default value is 30.
   /// - [speed]: Affects the rate at which the animation progresses. Default value is 2.
-  AnimatedMeshGradientOptions({
+  const AnimatedMeshGradientOptions({
     this.frequency = 5,
     this.amplitude = 30,
     this.speed = 2,

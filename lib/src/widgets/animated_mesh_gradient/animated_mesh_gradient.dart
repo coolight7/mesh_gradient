@@ -11,7 +11,7 @@ import 'package:util_xx/util_xx.dart';
 /// animation options, and a manual controller for animation control.
 class AnimatedMeshGradient extends StatelessWidget {
   /// Path to the shader asset used for the gradient animation.
-  static const String _shaderAssetPath =
+  static const String _shaderGradientAssetPath =
       'packages/mesh_gradient/shaders/animated_mesh_gradient.frag';
 
   /// Creates a meshed gradient with provided colors and animates between them.
@@ -35,7 +35,7 @@ class AnimatedMeshGradient extends StatelessWidget {
     // Attempts to precache the shader used for the gradient animation.
     Future(() async {
       try {
-        await ShaderBuilder.precacheShader(_shaderAssetPath);
+        await ShaderBuilder.precacheShader(_shaderGradientAssetPath);
       } catch (e) {
         debugPrint('[AnimatedMeshGradient] [Exception] Precaching Shader: $e');
         debugPrintStack(stackTrace: StackTrace.current);
@@ -87,7 +87,7 @@ class AnimatedMeshGradient extends StatelessWidget {
     }
 
     return ShaderBuilder(
-      assetKey: _shaderAssetPath,
+      assetKey: _shaderGradientAssetPath,
       (context, shader, child) {
         if (null != controller) {
           return AnimatedBuilder(
